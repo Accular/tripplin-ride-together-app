@@ -34,10 +34,9 @@ const MobileLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         {children}
       </main>
 
-      {/* Mobile Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex justify-around items-center px-2 glass-card z-10">
+      {/* Mobile Navigation - Increased z-index and ensured it's fixed at the bottom */}
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex justify-around items-center px-2 glass-card z-50">
         <NavItem to="/" icon={Home} label="Home" />
-        <NavItem to="/plan" icon={Map} label="Plan Ride" />
         <NavItem to="/community" icon={Users} label="Community" />
         <NavItem to="/messages" icon={MessageCircle} label="Messages" />
         <NavItem to="/profile" icon={UserCircle} label="Profile" />
