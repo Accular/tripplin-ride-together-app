@@ -25,9 +25,6 @@ const App = () => (
               <Index />
             </MobileLayout>
           } />
-          <Route path="/plan" element={
-            <Navigate to="/" replace />
-          } />
           <Route path="/community" element={
             <MobileLayout>
               <Community />
