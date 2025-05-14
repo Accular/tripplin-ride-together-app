@@ -3,10 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MobileLayout from "./components/layout/MobileLayout";
 import Index from "./pages/Index";
-import PlanRide from "./pages/PlanRide";
 import Community from "./pages/Community";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
@@ -27,9 +26,7 @@ const App = () => (
             </MobileLayout>
           } />
           <Route path="/plan" element={
-            <MobileLayout>
-              <PlanRide />
-            </MobileLayout>
+            <Navigate to="/" replace />
           } />
           <Route path="/community" element={
             <MobileLayout>
