@@ -115,8 +115,8 @@ const Index = () => {
             {showTraffic && (
               <div className="absolute inset-0 z-5">
                 {/* Visual representation of traffic would be here */}
-                <div className="absolute top-24 left-5 bg-red-500/30 h-12 w-24 rounded-full blur-md"></div>
-                <div className="absolute top-48 left-36 bg-yellow-500/30 h-12 w-32 rounded-full blur-md"></div>
+                <div className="absolute top-24 left-5 bg-red-500/30 h-12 w-24 rounded-full"></div>
+                <div className="absolute top-48 left-36 bg-yellow-500/30 h-12 w-32 rounded-full"></div>
               </div>
             )}
             
@@ -124,7 +124,7 @@ const Index = () => {
             {showWeather && (
               <div className="absolute top-4 left-4 z-5">
                 {/* Weather information would be displayed here */}
-                <div className="bg-background/70 backdrop-blur-sm p-2 rounded-lg shadow-sm text-xs flex items-center">
+                <div className="bg-background/70 p-2 rounded-lg shadow-sm text-xs flex items-center">
                   <Droplets className="h-3 w-3 mr-1 text-blue-500" />
                   <span>28°C | Partly Cloudy</span>
                 </div>
@@ -160,7 +160,7 @@ const Index = () => {
       {/* Waze-like Map Controls - Moved below the search bar */}
       <div className="relative z-10 px-4">
         <div className="flex justify-end">
-          <div className="space-y-2 p-2 rounded-lg bg-background/80 backdrop-blur-sm shadow-md">
+          <div className="space-y-2 p-2 rounded-lg bg-background/80 shadow-md">
             <div className="flex items-center space-x-2">
               <Switch id="traffic" checked={showTraffic} onCheckedChange={setShowTraffic} />
               <Label htmlFor="traffic" className="text-xs flex items-center">
