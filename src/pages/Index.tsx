@@ -85,6 +85,18 @@ const Index = () => {
       description: "Refuel • 2h from start"
     }
   ];
+  
+  // Traffic and weather information (mock data)
+  const trafficInfo = showTraffic ? [
+    { id: 1, type: 'heavy', location: 'MG Road', delay: '15 min' },
+    { id: 2, type: 'medium', location: 'Ring Road', delay: '8 min' }
+  ] : [];
+  
+  const weatherInfo = showWeather ? {
+    current: 'Partly Cloudy',
+    temperature: '28°C',
+    precipitation: '20%'
+  } : null;
 
   return (
     <div className="flex flex-col relative h-[calc(100vh-64px)]">
@@ -99,6 +111,26 @@ const Index = () => {
                 <div key={i} className="border border-gray-300/20"></div>
               ))}
             </div>
+            
+            {/* Traffic Overlay - Only show if traffic is enabled */}
+            {showTraffic && (
+              <div className="absolute inset-0 z-5">
+                {/* Visual representation of traffic would be here */}
+                <div className="absolute top-24 left-5 bg-red-500/30 h-12 w-24 rounded-full blur-md"></div>
+                <div className="absolute top-48 left-36 bg-yellow-500/30 h-12 w-32 rounded-full blur-md"></div>
+              </div>
+            )}
+            
+            {/* Weather Overlay - Only show if weather is enabled */}
+            {showWeather && (
+              <div className="absolute top-4 left-4 z-5">
+                {/* Weather information would be displayed here */}
+                <div className="bg-background/70 backdrop-blur-sm p-2 rounded-lg shadow-sm text-xs flex items-center">
+                  <Droplets className="h-3 w-3 mr-1 text-blue-500" />
+                  <span>28°C | Partly Cloudy</span>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Waze-like Map Controls */}
@@ -126,8 +158,8 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Search Box - Waze-like top search bar */}
-      <div className="relative z-10 p-4 pt-2">
+      {/* Search Box - Waze-like top search bar - Moved down to avoid overlay issues */}
+      <div className="relative z-10 p-4 pt-12">
         <Card className="glass-card shadow-lg">
           <CardContent className="p-2">
             <div className="flex items-center space-x-2">
@@ -282,7 +314,7 @@ const Index = () => {
           </div>
           
           {/* Upcoming Events */}
-          <div>
+          <div className="mb-16"> {/* Added bottom margin to prevent overlap with nav bar */}
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-lg font-semibold">Upcoming Events</h2>
               <Link to="/community" className="text-sm text-tripplin-purple">View all</Link>
