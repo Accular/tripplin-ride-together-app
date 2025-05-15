@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Calendar, Users, ArrowRight, Cloud, Droplets, Clock, ChevronDown } from 'lucide-react';
@@ -132,33 +131,10 @@ const Index = () => {
               </div>
             )}
           </div>
-          
-          {/* Waze-like Map Controls */}
-          <div className="absolute top-3 right-3 space-y-2 z-10">
-            <Button variant="outline" size="icon" className="h-8 w-8 bg-background/80 backdrop-blur-sm shadow-md">
-              <MapPin className="h-4 w-4" />
-            </Button>
-            
-            <div className="space-y-2 p-2 rounded-lg bg-background/80 backdrop-blur-sm shadow-md">
-              <div className="flex items-center space-x-2">
-                <Switch id="traffic" checked={showTraffic} onCheckedChange={setShowTraffic} />
-                <Label htmlFor="traffic" className="text-xs flex items-center">
-                  <Cloud className="h-3 w-3 mr-1" /> Traffic
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Switch id="weather" checked={showWeather} onCheckedChange={setShowWeather} />
-                <Label htmlFor="weather" className="text-xs flex items-center">
-                  <Droplets className="h-3 w-3 mr-1" /> Weather
-                </Label>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Search Box - Waze-like top search bar - Moved down to avoid overlay issues */}
+      {/* Search Box - Waze-like top search bar */}
       <div className="relative z-10 p-4 pt-12">
         <Card className="glass-card shadow-lg">
           <CardContent className="p-2">
@@ -179,6 +155,27 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+      
+      {/* Waze-like Map Controls - Moved below the search bar */}
+      <div className="relative z-10 px-4">
+        <div className="flex justify-end">
+          <div className="space-y-2 p-2 rounded-lg bg-background/80 backdrop-blur-sm shadow-md">
+            <div className="flex items-center space-x-2">
+              <Switch id="traffic" checked={showTraffic} onCheckedChange={setShowTraffic} />
+              <Label htmlFor="traffic" className="text-xs flex items-center">
+                <Cloud className="h-3 w-3 mr-1" /> Traffic
+              </Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch id="weather" checked={showWeather} onCheckedChange={setShowWeather} />
+              <Label htmlFor="weather" className="text-xs flex items-center">
+                <Droplets className="h-3 w-3 mr-1" /> Weather
+              </Label>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Sheet - Waze-like slide-up panel */}
