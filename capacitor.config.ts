@@ -14,6 +14,13 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchAutoHide: false,
     }
+  },
+  // Add Expo compatibility
+  ios: {
+    contentInset: 'always',
+  },
+  android: {
+    backgroundColor: "#ffffff"
   }
 };
 
