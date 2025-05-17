@@ -57,7 +57,7 @@ const groupSizes = [
 ];
 
 const rideFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters"),
+  title: z.string().min(3, "Title must be at least 3 characters").optional(),
   startLocation: z.string().min(3, "Start location is required"),
   endLocation: z.string().min(3, "End location is required"),
   rideType: z.enum(["now", "later"]).default("now"),
@@ -81,7 +81,6 @@ const RideCreationForm = () => {
   const form = useForm<RideFormValues>({
     resolver: zodResolver(rideFormSchema),
     defaultValues: {
-      title: "",
       startLocation: "",
       endLocation: "",
       rideType: "now",
@@ -131,20 +130,20 @@ const RideCreationForm = () => {
 
   return (
     <div className="p-4">
-      <div className="mb-6">
+      <div className="mb-6 border border-gray-200 rounded-lg p-3">
         <p className="text-sm text-muted-foreground mb-2 font-medium">When do you want to ride?</p>
         <ToggleGroup
           type="single"
           value={rideType}
           onValueChange={handleRideTypeToggle}
-          className="justify-start w-full"
+          className="justify-start w-full gap-2"
         >
-          <ToggleGroupItem value="now" className="flex items-center gap-2 flex-1 justify-center">
-            <Clock className="h-4 w-4" />
+          <ToggleGroupItem value="now" className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-white">
+            <Clock className="h-4 w-4 mr-2" />
             Ride Now
           </ToggleGroupItem>
-          <ToggleGroupItem value="later" className="flex items-center gap-2 flex-1 justify-center">
-            <Calendar className="h-4 w-4" />
+          <ToggleGroupItem value="later" className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-white">
+            <Calendar className="h-4 w-4 mr-2" />
             Ride Later
           </ToggleGroupItem>
         </ToggleGroup>
@@ -184,7 +183,7 @@ const RideCreationForm = () => {
             <h3 className="text-lg font-semibold">More Options</h3>
           </div>
 
-          {/* Only show time for "Ride Now" */}
+          {/* Only show start time for "Ride Now" */}
           {rideType === "now" && (
             <FormField
               control={form.control}
@@ -200,7 +199,7 @@ const RideCreationForm = () => {
                         {...field}
                       />
                     </FormControl>
-                    <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -265,7 +264,7 @@ const RideCreationForm = () => {
                           {...field}
                         />
                       </FormControl>
-                      <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                     </div>
                     <FormMessage />
                   </FormItem>
