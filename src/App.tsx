@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Community from "./pages/Community";
 import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
+import CreateRide from "./pages/CreateRide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,11 @@ const App = () => (
           <Route path="/profile" element={
             <MobileLayout>
               <Profile />
+            </MobileLayout>
+          } />
+          <Route path="/create-ride" element={
+            <MobileLayout>
+              <CreateRide />
             </MobileLayout>
           } />
           <Route path="*" element={<NotFound />} />
