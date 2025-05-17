@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -53,7 +54,7 @@ const rideFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   startLocation: z.string().min(3, "Start location is required"),
   endLocation: z.string().min(3, "End location is required"),
-  isPlannedRide: z.boolean().default(false),
+  rideType: z.enum(["now", "later"]).default("now"),
   startDate: z.date().optional(),
   startTime: z.string().optional(),
   endDate: z.date().optional(),
@@ -65,7 +66,7 @@ const rideFormSchema = z.object({
 type RideFormValues = z.infer<typeof rideFormSchema>;
 
 const RideCreationForm = () => {
-  const [isPlannedRide, setIsPlannedRide] = useState(false);
+  const [rideType, setRideType] = useState<"now" | "later">("now");
   const [isGroupRide, setIsGroupRide] = useState(false);
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ const RideCreationForm = () => {
       title: "",
       startLocation: "",
       endLocation: "",
-      isPlannedRide: false,
+      rideType: "now",
       isGroupRide: false,
     }
   });
@@ -84,20 +85,20 @@ const RideCreationForm = () => {
   const onSubmit = (data: RideFormValues) => {
     console.log("Ride data:", data);
     // Here you would typically send this data to an API
-    toast.success(`${isPlannedRide ? 'Planned ride' : 'Ride now'} created successfully!`);
+    toast.success(`${rideType === "later" ? 'Planned ride' : 'Ride now'} created successfully!`);
     navigate('/');
   };
 
-  const handleRideTypeToggle = (checked: boolean) => {
-    setIsPlannedRide(checked);
-    form.setValue("isPlannedRide", checked);
-    
-    if (!checked) {
-      // Reset date and time fields when switching to "Ride Now"
-      form.setValue("startDate", undefined);
-      form.setValue("endDate", undefined);
-      form.setValue("startTime", undefined);
-      form.setValue("endTime", undefined);
+  const handleRideTypeToggle = (value: "now" | "later") => {
+    if (value) {
+      setRideType(value);
+      form.setValue("rideType", value);
+      
+      if (value === "now") {
+        // Reset end date and time fields when switching to "Ride Now"
+        form.setValue("endDate", undefined);
+        form.setValue("endTime", undefined);
+      }
     }
   };
 
@@ -120,17 +121,25 @@ const RideCreationForm = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Create a Ride</h1>
+      <h2 className="text-lg font-semibold mb-4">Ride Options</h2>
       
-      <div className="flex items-center space-x-2 mb-6">
-        <Switch 
-          id="ride-type" 
-          checked={isPlannedRide} 
-          onCheckedChange={handleRideTypeToggle} 
-        />
-        <Label htmlFor="ride-type" className="text-sm font-medium">
-          {isPlannedRide ? "Planned Ride" : "Ride Now"}
-        </Label>
+      <div className="mb-6">
+        <p className="text-sm text-muted-foreground mb-2">When do you want to ride?</p>
+        <ToggleGroup
+          type="single"
+          value={rideType}
+          onValueChange={handleRideTypeToggle}
+          className="justify-start"
+        >
+          <ToggleGroupItem value="now" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Ride Now
+          </ToggleGroupItem>
+          <ToggleGroupItem value="later" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Ride Later
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
       
       <Form {...form}>
@@ -177,132 +186,140 @@ const RideCreationForm = () => {
             )}
           />
 
-          {isPlannedRide && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Start Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Select start date</span>
-                              )}
-                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarComponent
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                            className="p-3 pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          {/* Start Time for both "now" and "later" */}
+          <div className={cn(
+            "grid gap-4",
+            rideType === "later" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+          )}>
+            <FormField
+              control={form.control}
+              name="startTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Time</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type="time"
+                        placeholder="Select start time"
+                        {...field}
+                      />
+                    </FormControl>
+                    <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="startTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Time</FormLabel>
-                      <div className="relative">
+            {/* Only show start date for "later" */}
+            {rideType === "later" && (
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Start Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
                         <FormControl>
-                          <Input
-                            type="time"
-                            placeholder="Select start time"
-                            {...field}
-                          />
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Select start date</span>
+                            )}
+                            <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
                         </FormControl>
-                        <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="endDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>End Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Select end date</span>
-                              )}
-                              <Calendar className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarComponent
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                            className="p-3 pointer-events-auto"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="endTime"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Time</FormLabel>
-                      <div className="relative">
+          {/* Only show end date and end time for "later" */}
+          {rideType === "later" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>End Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
                         <FormControl>
-                          <Input
-                            type="time"
-                            placeholder="Select end time"
-                            {...field}
-                          />
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Select end date</span>
+                            )}
+                            <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
                         </FormControl>
-                        <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="endTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Time</FormLabel>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type="time"
+                          placeholder="Select end time"
+                          {...field}
+                        />
+                      </FormControl>
+                      <Clock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           )}
 
           {/* Group Ride Section */}
@@ -391,7 +408,7 @@ const RideCreationForm = () => {
           </div>
 
           <Button type="submit" className="w-full mt-6 bg-tripplin-gradient">
-            {isPlannedRide ? "Schedule Ride" : "Start Ride Now"}
+            {rideType === "later" ? "Schedule Ride" : "Start Ride Now"}
           </Button>
         </form>
       </Form>
