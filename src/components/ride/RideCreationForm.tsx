@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Group } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,10 +20,34 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+
+// Mock data for groups - In a real app, this would come from an API
+const userGroups = [
+  { id: '1', name: 'Weekend Riders' },
+  { id: '2', name: 'City Explorers' },
+  { id: '3', name: 'Mountain Bikers' },
+];
 
 const rideFormSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -34,12 +58,17 @@ const rideFormSchema = z.object({
   startTime: z.string().optional(),
   endDate: z.date().optional(),
   endTime: z.string().optional(),
+  groupId: z.string().optional(),
+  isGroupRide: z.boolean().default(false),
 });
 
 type RideFormValues = z.infer<typeof rideFormSchema>;
 
 const RideCreationForm = () => {
   const [isPlannedRide, setIsPlannedRide] = useState(false);
+  const [isGroupRide, setIsGroupRide] = useState(false);
+  const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
+  const navigate = useNavigate();
   
   const form = useForm<RideFormValues>({
     resolver: zodResolver(rideFormSchema),
@@ -48,12 +77,15 @@ const RideCreationForm = () => {
       startLocation: "",
       endLocation: "",
       isPlannedRide: false,
+      isGroupRide: false,
     }
   });
 
   const onSubmit = (data: RideFormValues) => {
     console.log("Ride data:", data);
     // Here you would typically send this data to an API
+    toast.success(`${isPlannedRide ? 'Planned ride' : 'Ride now'} created successfully!`);
+    navigate('/');
   };
 
   const handleRideTypeToggle = (checked: boolean) => {
@@ -67,6 +99,23 @@ const RideCreationForm = () => {
       form.setValue("startTime", undefined);
       form.setValue("endTime", undefined);
     }
+  };
+
+  const handleGroupRideToggle = (checked: boolean) => {
+    setIsGroupRide(checked);
+    form.setValue("isGroupRide", checked);
+    
+    if (!checked) {
+      // Reset group selection when toggling off group ride
+      form.setValue("groupId", undefined);
+    }
+  };
+
+  const handleCreateNewGroup = () => {
+    setShowCreateGroupDialog(false);
+    // In a real app, you would navigate to the group creation page
+    navigate('/community');
+    toast.info('Redirecting to create a new group');
   };
 
   return (
@@ -255,6 +304,91 @@ const RideCreationForm = () => {
               </div>
             </>
           )}
+
+          {/* Group Ride Section */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="flex items-center space-x-2 mb-4">
+              <Switch 
+                id="group-ride" 
+                checked={isGroupRide} 
+                onCheckedChange={handleGroupRideToggle} 
+              />
+              <Label htmlFor="group-ride" className="text-sm font-medium">
+                Group Ride
+              </Label>
+            </div>
+
+            {isGroupRide && (
+              <div className="space-y-4">
+                {userGroups.length > 0 ? (
+                  <FormField
+                    control={form.control}
+                    name="groupId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Select Group</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a group" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {userGroups.map(group => (
+                              <SelectItem key={group.id} value={group.id}>
+                                {group.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <div className="bg-muted p-4 rounded-md text-center">
+                    <p className="mb-2">You aren't part of any groups yet</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCreateNewGroup}
+                      className="flex items-center"
+                    >
+                      <Group className="mr-2 h-4 w-4" />
+                      Create New Group
+                    </Button>
+                  </div>
+                )}
+
+                <Dialog open={showCreateGroupDialog} onOpenChange={setShowCreateGroupDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <Group className="mr-2 h-4 w-4" />
+                      Create New Group
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create a New Group</DialogTitle>
+                    </DialogHeader>
+                    <div className="pt-4">
+                      <p className="text-muted-foreground">
+                        Creating a new group will redirect you to the community page.
+                      </p>
+                      <Button 
+                        className="mt-4 w-full" 
+                        onClick={handleCreateNewGroup}
+                      >
+                        Continue to Group Creation
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+          </div>
 
           <Button type="submit" className="w-full mt-6 bg-tripplin-gradient">
             {isPlannedRide ? "Schedule Ride" : "Start Ride Now"}
